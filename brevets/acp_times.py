@@ -14,21 +14,27 @@ import math
 #  same arguments.
 #
 
-def calc(control_dist_km,open):
+def calc(control_dist_km,max_dist,open):
     time = 0
     min_v = 15
     max_v = 34
-    control_dist_km = round(control_dist_km)
 
+    control_dist_km = round(control_dist_km)
     if open == 0:
-        if control_dist_km > 200:
+        if control_dist_km >= 200:
             time+=200/34
+            if (control_dist_km >= max_dist and max_dist == 200):
+                return time
         else:
             time += (control_dist_km/max_v)
 
+    #close
     if open == 1:
-        if control_dist_km > 200:
+        if control_dist_km >= 200:
+
             time+=200/15
+            if (control_dist_km >= max_dist and max_dist == 200):
+                return time+(1/6)
         else:
             if(control_dist_km<=60):
                 min_v = 20
@@ -36,28 +42,49 @@ def calc(control_dist_km,open):
             else:
                 time += (control_dist_km/min_v)
 
-    if control_dist_km > 200:
+
+    if control_dist_km >= 200:
         min_v = 15
         max_v = 32
         if open == 0:
             time += max(0,min(control_dist_km-200,200))/max_v
+            if (control_dist_km >= max_dist) and max_dist == 300:
+                time = 300/max_v
+                return time
         else:
             time += max(0,min(control_dist_km-200,200))/min_v
-    if control_dist_km > 400:
+            if (control_dist_km >= max_dist) and max_dist == 300:
+                time = 300/min_v
+                return time
+
+    if control_dist_km >= 400:
         min_v = 15
         max_v = 30
         if open == 0:
             time += max(0,min(control_dist_km-400,200))/max_v
+            if (control_dist_km >= max_dist) and max_dist == 400:
+                time -= max(0,min(control_dist_km-400,200))/max_v
+                return time
         else:
             time += max(0,min(control_dist_km-400,200))/min_v
-    if control_dist_km > 600:
+            if (control_dist_km >= max_dist) and max_dist == 400:
+                time -= max(0,min(control_dist_km-400,200))/min_v
+                return time + 2/6
+
+    if control_dist_km >= 600:
         min_v = 11.428
         max_v = 28
         if open == 0:
             time += max(0,min(control_dist_km-600,400))/max_v
+            if (control_dist_km >= max_dist) and max_dist == 600:
+                time -= max(0,min(control_dist_km-600,400))/max_v
+                return time
         else:
             time += max(0,min(control_dist_km-600,400))/min_v
-    if control_dist_km > 1000:
+            if (control_dist_km >= max_dist) and max_dist == 600:
+                time -= max(0,min(control_dist_km-600,400))/min_v
+                return time
+    if control_dist_km >= 1000:
         min_v = 13.33
         max_v = 26
         if open == 0:
@@ -82,16 +109,11 @@ def open_time(control_dist_km, brevet_dist_km, brevet_start_time):
         raise Exception('control greater than max dist by more than 20%')
         return
     else:
-        a = calc(control_dist_km,0)
+        a = calc(control_dist_km,brevet_dist_km,0)
         m = (a%1)*60
-
         h = math.floor(a)
         m = round(m)
-        print(a)
-        print(h)
-        print(m)
         open = brevet_start_time.shift(hours=+h,minutes=+m)
-        print(open)
     return open
 
 
@@ -111,16 +133,12 @@ def close_time(control_dist_km, brevet_dist_km, brevet_start_time):
         raise Exception('control greater than max dist by more than 20%')
         return
     else:
-        a = calc(control_dist_km,1)
+        a = calc(control_dist_km,brevet_dist_km,1)
         m = (a%1)*60
 
         h = math.floor(a)
         m = round(m)
-        print(a)
-        print(h)
-        print(m)
         open = brevet_start_time.shift(hours=+h,minutes=+m)
-        print(open)
     return open
     
 
