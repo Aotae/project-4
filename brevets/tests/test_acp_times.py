@@ -5,7 +5,7 @@ Write your tests HERE AND ONLY HERE.
 """
 import nose    # Testing framework
 from nose.tools import assert_raises
-from brevets.acp_times import close_time,open_time
+from acp_times import close_time,open_time
 import logging
 import arrow
 
